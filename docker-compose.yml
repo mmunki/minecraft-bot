@@ -1,0 +1,15 @@
+services:
+  bot:
+    build: .
+    container_name: minecraft-bot
+    restart: unless-stopped
+    environment:
+      MC_HOST: ${MC_HOST:-mikailamin.aternos.me}
+      MC_PORT: ${MC_PORT:-30266}
+      MC_USERNAME: ${MC_USERNAME:-plugin-01}
+      MC_AUTH: ${MC_AUTH:-offline}
+      MC_VERSION: ${MC_VERSION:-26.2}
+      MC_FREEZE: ${MC_FREEZE:-true}
+      MC_RECONNECT_MS: ${MC_RECONNECT_MS:-30000}
+      MC_CHAT_LOG: ${MC_CHAT_LOG:-false}
+    stop_grace_period: 10s

@@ -1,0 +1,5 @@
+node_modules/
+bot.log
+.env
+*.log
+test-server/data/

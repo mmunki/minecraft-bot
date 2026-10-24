@@ -1,0 +1,77 @@
+name: minecraft-bot
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: "How long to run the bot (1-330)"
+        default: "330"
+        type: string
+      host:
+        description: "Minecraft server hostname"
+        default: "mikailamin.aternos.me"
+        type: string
+      port:
+        description: "Minecraft server port"
+        default: "30266"
+        type: string
+      username:
+        description: "Bot player name"
+        default: "plugin-01"
+        type: string
+      version:
+        description: "Minecraft version"
+        default: "26.2"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: minecraft-bot
+  cancel-in-progress: false
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      MC_HOST: ${{ inputs.host }}
+      MC_PORT: ${{ inputs.port }}
+      MC_USERNAME: ${{ inputs.username }}
+      MC_VERSION: ${{ inputs.version }}
+      MC_AUTH: offline
+      MC_FREEZE: "true"
+      MC_RECONNECT_MS: "30000"
+      MC_CHAT_LOG: "false"
+      DURATION_MINUTES: ${{ inputs.duration_minutes }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Show dependency versions
+        run: npm ls mineflayer minecraft-data minecraft-protocol prismarine-chunk prismarine-physics
+
+      - name: Run the bot
+        run: |
+          set -o pipefail
+          timeout "${DURATION_MINUTES}m" node bot.js 2>&1 | tee bot.log
+        continue-on-error: true
+
+      - name: Upload bot log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-log
+          path: bot.log
+          if-no-files-found: ignore
