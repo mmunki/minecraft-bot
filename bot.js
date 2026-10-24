@@ -7,6 +7,7 @@
 // If the connection drops it reconnects with a bounded backoff.
 
 const mineflayer = require('mineflayer')
+const { reasonToString } = require('./lib/chat')
 
 const config = {
   host: process.env.MC_HOST || 'mikailamin.aternos.me',
@@ -26,22 +27,6 @@ let attempts = 0
 
 function log (...args) {
   console.log(new Date().toISOString(), ...args)
-}
-
-function reasonToString (reason) {
-  if (reason == null) return String(reason)
-  if (typeof reason === 'string') return reason
-  try {
-    if (typeof reason.toString === 'function') {
-      const text = reason.toString()
-      if (text && text !== '[object Object]') return text
-    }
-  } catch {}
-  try {
-    return JSON.stringify(reason)
-  } catch {
-    return String(reason)
-  }
 }
 
 function scheduleReconnect (why) {
